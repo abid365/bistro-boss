@@ -1,16 +1,18 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   loadCaptchaEnginge,
   LoadCanvasTemplate,
   validateCaptcha,
 } from "react-simple-captcha";
 import { AuthContext } from "../../Providers/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
 const Login = () => {
-  const capthcaRef = useRef(null);
   const { signIn } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   // context: the login button will remain disbaled untill validation is complete
   const [disabled, setDisabled] = useState(true);
   useEffect(() => {
@@ -26,11 +28,12 @@ const Login = () => {
     signIn(email, password).then((result) => {
       const user = result.user;
       console.log(user);
+      navigate(from, { replace: true });
     });
   };
 
   const handleValidateCaptcha = (e) => {
-    const user_captcha_value = capthcaRef.current.value;
+    const user_captcha_value = e.target.value;
     console.log(user_captcha_value);
     // check conditionally and pop up a swal or toast
     if (validateCaptcha(user_captcha_value)) {
@@ -92,15 +95,12 @@ const Login = () => {
                   type="text"
                   placeholder="Type Here"
                   name="captcha"
-                  ref={capthcaRef}
                   className="input input-bordered"
+                  onBlur={handleValidateCaptcha}
                 />
-                <button
-                  onClick={handleValidateCaptcha}
-                  className="btn btn-xs btn-outline mt-1"
-                >
+                {/* <button className="btn btn-xs btn-outline mt-1">
                   Validate
-                </button>
+                </button> */}
               </div>
               <div className="form-control mt-6">
                 <input
